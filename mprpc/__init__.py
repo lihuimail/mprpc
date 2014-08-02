@@ -9,6 +9,6 @@ try:
 except:
     pass
 try:
-    from client import ClientRPC as RPCSimple
+    from client_simple import ClientRPC as RPCSimple
 except:
     pass
