@@ -15,7 +15,7 @@ MSGPACKRPC_REQUEST = 0
 MSGPACKRPC_RESPONSE = 1
 SOCKET_RECV_SIZE = 1024 ** 2
 #MSGPACK,STRINGS,PICKLES
-METHOD_RECV_SIZE = 7
+METHOD_RECV_SIZE = 8
 
 class RPCProtocolError(Exception):
     pass
@@ -70,7 +70,7 @@ class ClientRPC(object):
     def _msgpack_create_request(self, method, args,kwargs):
         self._msg_id += 1
         req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
-        return 'MSGPACK'+self._packer.pack(req)
+        return 'MSGPACK:'+self._packer.pack(req)
     def _msgpack_parse_response(self,response):
         if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')
@@ -107,7 +107,7 @@ class ClientPIK(ClientRPC):
     def _pickles_create_request(self, method, args,kwargs):
         self._msg_id += 1
         req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
-        return 'PICKLES'+pickle.dumps(req)
+        return 'PICKLES:'+pickle.dumps(req)
     def _pickles_parse_response(self,response):
         if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')
@@ -119,4 +119,37 @@ class ClientPIK(ClientRPC):
         return result
     def call(self, method, *args, **kwargs):
         return self.pickles_call(method, *args, **kwargs)
+
+
+class ClientSTR(ClientRPC):
+    def __init__(self, host, port, timeout=None, lazy=False,pack_encoding='utf-8', unpack_encoding='utf-8'):
+        self._host = host
+        self._port = port
+        self._timeout = timeout
+        self._msg_id = 0
+        self._socket = None
+        if not lazy:
+            self.open()
+    def strings_call(self, method, *args,**kwargs):
+        req = self._strings_create_request(method, args,kwargs)
+        self._socket.sendall(req)
+        data = self._socket.recv(SOCKET_RECV_SIZE)
+        if not data:
+            raise IOError('Connection closed')
+        return self._strings_parse_response(data)
+    def _strings_create_request(self, method, args,kwargs):
+        self._msg_id += 1
+        req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
+        return 'STRINGS:'+req
+    def _strings_parse_response(self,response):
+        if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
+            raise RPCProtocolError('Invalid protocol')
+        (_, msg_id, error, result) = response
+        if msg_id != self._msg_id:
+            raise RPCError('Invalid Message ID')
+        if error:
+            raise RPCError(str(error))
+        return result
+    def call(self, method, *args, **kwargs):
+        return self.strings_call(method, *args, **kwargs)
 

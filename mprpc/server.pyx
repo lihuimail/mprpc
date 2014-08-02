@@ -60,17 +60,19 @@ cdef class RPCServer:
             if not rpc_type:
                 logging.debug('Client disconnected')
                 break
-            if rpc_type=='MSGPACK':
+            if rpc_type == 'MSGPACK:':
                 result=self._msgpack_run()
-            elif rpc_type=='STRINGS':
-                pass
-            elif rpc_type=='PICKLES':
+            elif rpc_type=='STRINGS:':
+                result=self._strings_run()
+            elif rpc_type=='PICKLES:':
                 result=self._pickles_run()
-            elif rpc_type=='UNKOWNS':
+            elif rpc_type=='UNKOWNS:':
                 pass
-            elif rpc_type=='JSONSTR':
+            elif rpc_type=='BUFFERS:':
                 pass
-            elif rpc_type=='BSONSTR':
+            elif rpc_type=='JSONSTR:':
+                pass
+            elif rpc_type=='BSONSTR:':
                 pass
             else:
                 self._unpacker.feed(rpc_type)
@@ -79,9 +81,7 @@ cdef class RPCServer:
                 logging.debug('Client disconnected')
                 break
 
-    #def _run(self):
-    #    self._msgpack_run()
-
+    #####################################################
     cdef int  _msgpack_run(self):
         cdef bytes data
         cdef tuple req, args
@@ -140,6 +140,7 @@ cdef class RPCServer:
         finally:
             self._send_lock.release()
 
+    #####################################################
     cdef int _pickles_run(self):
         cdef bytes data
         cdef tuple req, args
@@ -196,6 +197,63 @@ cdef class RPCServer:
             self._socket.sendall(pickle.dumps(msg))
         finally:
             self._send_lock.release()
+
+    #####################################################
+    cdef int _strings_run(self):
+        cdef bytes data
+        cdef tuple req, args
+        cdef dict kwargs
+        cdef int msg_id=0
+        cdef int result=0
+        data = self._socket.recv(SOCKET_RECV_SIZE)
+        if not data:
+            logging.debug('Client disconnected')
+            result=-1
+            return result
+        (msg_id, method, args, kwargs) = self._strings_parse_request(req)
+        try:
+            ret = method(*args,**kwargs)
+        except Exception, e:
+            logging.exception('An error has occurred')
+            self._strings_send_error(str(e), msg_id)
+            result=0
+        else:
+            self._strings_send_result(ret, msg_id)
+            result=0
+        return result
+    cdef tuple _strings_parse_request(self, tuple req):
+        if (len(req) != 5 or req[0] != MSGPACKRPC_REQUEST):
+            raise RPCProtocolError('Invalid protocol')
+        cdef tuple args
+        cdef dict kwargs
+        cdef int msg_id=0
+        (_, msg_id, method_name, args ,kwargs) = req
+        if method_name.startswith('_'):
+            raise MethodNotFoundError('Method not callow: %s', method_name)
+        if not hasattr(self, method_name):
+            raise MethodNotFoundError('Method not found: %s', method_name)
+        method = getattr(self, method_name)
+        if not hasattr(method, '__call__'):
+            raise MethodNotFoundError('Method is not callable: %s', method_name)
+        return (msg_id, method, args, kwargs)
+    cdef _strings_send_result(self, object result, int msg_id):
+        msg = (MSGPACKRPC_RESPONSE, msg_id, None, result)
+        self._pickles_send(msg)
+    cdef _strings_send_error(self, str error, int msg_id):
+        msg = (MSGPACKRPC_RESPONSE, msg_id, error, None)
+        self._pickles_send(msg)
+    cdef _strings_send(self, tuple msg):
+        self._send_lock.acquire()
+        try:
+            self._socket.sendall(pickle.dumps(msg))
+        finally:
+            self._send_lock.release()
+
+
+
+
+
+
 
 
 
