@@ -40,17 +40,12 @@ cdef class RPCServer:
     cdef _unpacker
     cdef _send_lock
 
-    def __init__(self, sock, address, pack_encoding='utf-8',
-                 unpack_encoding='utf-8'):
+    def __init__(self, sock, address, pack_encoding='utf-8',unpack_encoding='utf-8'):
         self._socket = sock
-
         self._packer = msgpack.Packer(encoding=pack_encoding)
-        self._unpacker = msgpack.Unpacker(encoding=unpack_encoding,
-                                          use_list=False)
+        self._unpacker = msgpack.Unpacker(encoding=unpack_encoding,use_list=False)
         self._send_lock = Semaphore()
-
         self._run()
-
     def __del__(self):
         try:
             self._socket.close()
@@ -62,65 +57,58 @@ cdef class RPCServer:
         cdef tuple req, args
         cdef dict kwargs
         cdef int msg_id
-
         while True:
             data = self._socket.recv(SOCKET_RECV_SIZE)
             if not data:
                 logging.debug('Client disconnected')
                 break
-
             self._unpacker.feed(data)
             try:
                 req = self._unpacker.next()
             except StopIteration:
                 continue
-
-            (msg_id, method, args, kwargs) = self._parse_request(req)
-
+            (msg_id, method, args, kwargs) = self._msgpack_parse_request(req)
             try:
                 ret = method(*args,**kwargs)
-
             except Exception, e:
                 logging.exception('An error has occurred')
-                self._send_error(str(e), msg_id)
-
+                self._msgpack_send_error(str(e), msg_id)
             else:
-                self._send_result(ret, msg_id)
+                self._msgpack_send_result(ret, msg_id)
 
-    cdef tuple _parse_request(self, tuple req):
+    cdef tuple _msgpack_parse_request(self, tuple req):
         if (len(req) != 5 or req[0] != MSGPACKRPC_REQUEST):
             raise RPCProtocolError('Invalid protocol')
-
         cdef tuple args
         cdef dict kwargs
         cdef int msg_id
-
         (_, msg_id, method_name, args ,kwargs) = req
-
         if method_name.startswith('_'):
             raise MethodNotFoundError('Method not found: %s', method_name)
-
         if not hasattr(self, method_name):
             raise MethodNotFoundError('Method not found: %s', method_name)
-
         method = getattr(self, method_name)
         if not hasattr(method, '__call__'):
             raise MethodNotFoundError('Method is not callable: %s', method_name)
-
         return (msg_id, method, args, kwargs)
-
-    cdef _send_result(self, object result, int msg_id):
+    cdef _msgpack_send_result(self, object result, int msg_id):
         msg = (MSGPACKRPC_RESPONSE, msg_id, None, result)
-        self._send(msg)
-
-    cdef _send_error(self, str error, int msg_id):
+        self._msgpack_send(msg)
+    cdef _msgpack_send_error(self, str error, int msg_id):
         msg = (MSGPACKRPC_RESPONSE, msg_id, error, None)
-        self._send(msg)
-
-    cdef _send(self, msg):
+        self._msgpack_send(msg)
+    cdef _msgpack_send(self, msg):
         self._send_lock.acquire()
         try:
             self._socket.sendall(self._packer.pack(msg))
-
         finally:
             self._send_lock.release()
+
+
+
+
+
+
+
+
+
