@@ -57,7 +57,6 @@ cdef class RPCServer:
         cdef int result=0
         while True:
             rpc_type = self._socket.recv(METHOD_RECV_SIZE)
-            print '222222222',rpc_type
             if not rpc_type:
                 logging.debug('Client disconnected')
                 break
@@ -78,7 +77,6 @@ cdef class RPCServer:
             else:
                 self._unpacker.feed(rpc_type)
                 result=self._msgpack_run()
-            print '666666',result
             if result==-1:
                 logging.debug('Client disconnected')
                 break
@@ -102,23 +100,17 @@ cdef class RPCServer:
             except StopIteration:
                 continue
             (msg_id, method, args, kwargs) = self._msgpack_parse_request(req)
-            print '0',msg_id, method, args, kwargs,result
             try:
                 ret = method(*args,**kwargs)
-                print '33333333333333333'
             except Exception, e:
-                print '111111111111111111'
                 logging.exception('An error has occurred')
                 self._msgpack_send_error(str(e), msg_id)
                 result=0
                 break
             else:
-                print '222222222222222222'
                 self._msgpack_send_result(ret, msg_id)
                 result=0
                 break
-            print '1',msg_id, method, args, kwargs,result
-        print '5555555555555555555',result
         return result
     cdef tuple _msgpack_parse_request(self, tuple req):
         if (len(req) != 5 or req[0] != MSGPACKRPC_REQUEST):
