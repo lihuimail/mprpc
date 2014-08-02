@@ -157,7 +157,8 @@ class ClientSTR(ClientRPC):
             raise RPCError('Invalid Message ID')
         if error.strip():
             raise RPCError(str(error))
-        return self._socket
+        print 'self._socket'
+        return self._socket,response
     def call(self, method, *args, **kwargs):
         return self.strings_call(method, *args, **kwargs)
 
