@@ -10,7 +10,7 @@ def run_sum_server():
         def sum(self, x, y):
             return x + y
         def bday(self,body=None):
-            return body.recv()
+            return body.recv(1000)
 
     server = StreamServer(('127.0.0.1', 6000), SumServer)
     server.serve_forever()
