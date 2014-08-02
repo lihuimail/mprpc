@@ -62,8 +62,19 @@ cdef class RPCServer:
                 break
             if rpc_type=='MSGPACK':
                 result=self._msgpack_run()
+            elif rpc_type=='STRINGS':
+                pass
+            elif rpc_type=='PICKLES':
+                pass
+            elif rpc_type=='UNKOWNS':
+                pass
+            elif rpc_type=='JSONSTR':
+                pass
+            elif rpc_type=='BSONSTR':
+                pass
             else:
-                raise
+                self._unpacker.feed(rpc_type)
+                result=self._msgpack_run()
             if result==-1:
                 logging.debug('Client disconnected')
                 break
