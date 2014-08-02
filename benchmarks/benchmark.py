@@ -62,7 +62,7 @@ if __name__ == '__main__':
     #p = multiprocessing.Process(target=run_sum_server)
     #p.start()
 
-    call()
+    call0()
 
     call1()
     call2()
