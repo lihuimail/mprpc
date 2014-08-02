@@ -86,7 +86,7 @@ cdef class RPCServer:
         cdef bytes data
         cdef tuple req, args
         cdef dict kwargs
-        cdef int msg_id
+        cdef int msg_id=0
         cdef int result=0
         while True:
             data = self._socket.recv(SOCKET_RECV_SIZE)
@@ -117,7 +117,7 @@ cdef class RPCServer:
             raise RPCProtocolError('Invalid protocol')
         cdef tuple args
         cdef dict kwargs
-        cdef int msg_id
+        cdef int msg_id=0
         (_, msg_id, method_name, args ,kwargs) = req
         if method_name.startswith('_'):
             raise MethodNotFoundError('Method not callow: %s', method_name)
@@ -144,7 +144,7 @@ cdef class RPCServer:
         cdef bytes data
         cdef tuple req, args
         cdef dict kwargs
-        cdef int msg_id
+        cdef int msg_id=0
         cdef int result=0
         data = self._socket.recv(SOCKET_RECV_SIZE)
         if not data:
@@ -174,7 +174,7 @@ cdef class RPCServer:
             raise RPCProtocolError('Invalid protocol')
         cdef tuple args
         cdef dict kwargs
-        cdef int msg_id
+        cdef int msg_id=0
         (_, msg_id, method_name, args ,kwargs) = req
         if method_name.startswith('_'):
             raise MethodNotFoundError('Method not callow: %s', method_name)
