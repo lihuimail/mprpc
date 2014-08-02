@@ -1,16 +1,42 @@
 # cython: profile=False
 # -*- coding: utf-8 -*-
 
-import logging
-import msgpack
+try:
+    import logging
+except:
+    pass
+try:
+    import msgpack
+except:
+    pass
 import time
-import cPickle as pickle
-from gevent import socket
-from gsocketpool.connection import Connection
+try:
+    import cPickle as pickle
+except:
+    import pickle
+try:
+    import gevent
+except:
+    pass
+import socket
+try:
+    from gsocketpool.connection import Connection
+except:
+    class Connection:pass
 
-from exceptions import RPCProtocolError, RPCError
-from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE
 
+MSGPACKRPC_REQUEST = 0
+MSGPACKRPC_RESPONSE = 1
+SOCKET_RECV_SIZE = 1024 ** 2
+#MSGPACK,STRINGS,PICKLES
+METHOD_RECV_SIZE = 7
+
+class RPCProtocolError(Exception):
+    pass
+class MethodNotFoundError(Exception):
+    pass
+class RPCError(Exception):
+    pass
 
 cdef class RPCClient:
     """RPC client.
@@ -55,7 +81,7 @@ cdef class RPCClient:
         """Opens a connection."""
         assert self._socket is None, 'The connection has already been established'
         logging.debug('openning a msgpackrpc connection')
-        self._socket = socket.create_connection((self._host, self._port))
+        self._socket = gevent.socket.create_connection((self._host, self._port))
         if self._timeout:
             self._socket.settimeout(self._timeout)
     def close(self):
