@@ -29,7 +29,7 @@ MSGPACKRPC_REQUEST = 0
 MSGPACKRPC_RESPONSE = 1
 SOCKET_RECV_SIZE = 1024 ** 2
 #MSGPACK,STRINGS,PICKLES
-METHOD_RECV_SIZE = 7
+METHOD_RECV_SIZE = 8
 
 class RPCProtocolError(Exception):
     pass
@@ -107,7 +107,7 @@ cdef class RPCClient:
         self._msg_id += 1
         cdef tuple req
         req = (MSGPACKRPC_REQUEST, self._msg_id, method, args, kwargs)
-        return 'MSGPACK'+self._packer.pack(req)
+        return 'MSGPACK:'+self._packer.pack(req)
     cdef _msgpack_parse_response(self, tuple response):
         cdef int msg_id
         if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
