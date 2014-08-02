@@ -230,9 +230,9 @@ cdef class RPCServer:
         cdef tuple args=()
         cdef dict kwargs={}
         cdef int msg_id=0
-        (_, msg_id, method_name) = req
-        msg_id=int(msg_id.lstrip())
-        method_name=method_name.lstrip()
+        msg_id=int(req[1].lstrip())
+        method_name=req[2].lstrip()
+        print msg_id,method_name
         if method_name.startswith('_'):
             raise MethodNotFoundError('Method not callow: %s', method_name)
         if not hasattr(self, method_name):
