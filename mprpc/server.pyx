@@ -54,7 +54,7 @@ cdef class RPCServer:
 
     def _run(self):
         cdef bytes rpc_type
-        cdef int result
+        cdef int result=0
         while True:
             rpc_type = self._socket.recv(METHOD_RECV_SIZE)
             if not rpc_type:
