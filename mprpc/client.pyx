@@ -24,21 +24,8 @@ try:
 except:
     class Connection:pass
 
-
-MSGPACKRPC_REQUEST = 0
-MSGPACKRPC_RESPONSE = 1
-SOCKET_RECV_SIZE = 1024 ** 2
-#MSGPACK,STRINGS,PICKLES
-METHOD_RECV_SIZE = 8
-METHOD_STRINGS_SIZE = 30
-METHOD_URIHTTP_SIZE = 512
-
-class RPCProtocolError(Exception):
-    pass
-class MethodNotFoundError(Exception):
-    pass
-class RPCError(Exception):
-    pass
+from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
+from exceptions import MethodNotFoundError, RPCProtocolError,RPCError
 
 cdef class RPCClient:
     """RPC client.
