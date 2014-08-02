@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import urllib
 import socket
 try:
     import msgpack
@@ -24,6 +25,28 @@ class MethodNotFoundError(Exception):
     pass
 class RPCError(Exception):
     pass
+
+
+def encode_urihttp(method=None,args=None,kwargs=None):
+    m1=[]
+    if method is None or method=='':
+        method='default'
+    if args:
+        method+='/'+'/'.join(args)
+    for k,v in sorted(kwargs.items()):
+        if v is None:
+            continue
+        if type(v)==unicode:
+            v=v.encode('utf-8')
+        elif type(v)!=str:
+            v=str(v)
+        v=urllib.quote(v)
+        m1.append('%s=%s'%(k,v))
+    if m1:
+        result=method+'?'+'&'.join(m1)
+    else:
+        result=method
+    return result
 
 class ClientRPC(object):
     def __init__(self, host, port, timeout=None, lazy=False,pack_encoding='utf-8', unpack_encoding='utf-8'):

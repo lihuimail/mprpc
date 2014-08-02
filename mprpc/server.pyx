@@ -3,12 +3,49 @@
 
 import logging
 import msgpack
+import urllib
 import cPickle as pickle
 from gevent.coros import Semaphore
 
 from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRING_SIZE
 from exceptions import MethodNotFoundError, RPCProtocolError
 
+def decode_urihttp(url=None):
+    key=url
+    kwargs={}
+    method='default'
+    if key is None:
+        return method,[],kwargs
+    if key.find('?')==-1 and key.find('|')!=-1:
+        key=key.replace('|','?')
+    if key.find('?')!=-1:
+        method,k2=key.split('?',1)
+        if k2.find('#')!=-1:
+            k2=k2.split('#')[0]
+    else:
+        method=key
+        k2=''
+    method='/'.join([v.strip() for v in method.strip('/').split('/') if v.strip()])
+    if method.find('/')==-1:
+        k8=''
+    else:
+        method,k8=k1.split('/',1)
+    args=[v for v in k8.split('/') if v]
+    if method=='':
+        method='default'
+    if k2=='':
+        return method,args,kwargs
+    for v in k2.split('&'):
+        if not v:
+            continue
+        elif v.find('=')==-1:
+            continue
+        k4,k5=v.split('=',1)
+        if k5.find('%')!=-1:
+            k5=urllib.unquote(k5)
+        kwargs[k4]=k5
+    result=method,args,kwargs
+    return result
 
 cdef class RPCServer:
     """RPC server.
