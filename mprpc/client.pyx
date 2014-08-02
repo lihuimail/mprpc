@@ -92,8 +92,7 @@ cdef class RPCClient:
         if error:
             raise RPCError(str(error))
         return result
-
-    def call(self, str method, *args, **kwargs):
+    def msgpack_call(self, str method, *args, **kwargs):
         """Calls a RPC method.
 
         :param str method: Method name.
@@ -114,6 +113,9 @@ cdef class RPCClient:
             except StopIteration:
                 continue
         return self._msgpack_parse_response(response)
+
+    def call(self, str method, *args, **kwargs):
+        return self.msgpack_call(method, *args, **kwargs)
 
 class RPCPoolClient(RPCClient, Connection):
     """Wrapper class of :class:`RPCClient <mprpc.client.RPCClient>` for `gsocketpool <https://github.com/studio-ousia/gsocketpool>`_.
