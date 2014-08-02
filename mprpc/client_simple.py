@@ -70,7 +70,7 @@ class ClientRPC(object):
     def _msgpack__create_request(self, method, args,kwargs):
         self._msg_id += 1
         req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
-        return self._packer.pack(req)
+        return 'MSGPACK'+self._packer.pack(req)
     def _msgpack__parse_response(self,response):
         if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')
