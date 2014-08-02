@@ -211,6 +211,7 @@ cdef class RPCServer:
             result=-1
             return result
         req=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
+        print req
         (msg_id, method, args, kwargs) = self._strings_parse_request(req)
         print msg_id, method, args, kwargs
         try:
