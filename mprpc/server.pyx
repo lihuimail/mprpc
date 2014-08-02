@@ -133,7 +133,7 @@ cdef class RPCServer:
     cdef _msgpack_send_error(self, str error, int msg_id):
         msg = (MSGPACKRPC_RESPONSE, msg_id, error, None)
         self._msgpack_send(msg)
-    cdef _msgpack_send(self, msg):
+    cdef _msgpack_send(self,tuple  msg):
         self._send_lock.acquire()
         try:
             self._socket.sendall(self._packer.pack(msg))
@@ -190,7 +190,7 @@ cdef class RPCServer:
     cdef _pickles_send_error(self, str error, int msg_id):
         msg = (MSGPACKRPC_RESPONSE, msg_id, error, None)
         self._pickles_send(msg)
-    cdef _pickles_send(self, msg):
+    cdef _pickles_send(self, tuple msg):
         self._send_lock.acquire()
         try:
             self._socket.sendall(pickle.dumps(msg))
