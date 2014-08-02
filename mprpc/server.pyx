@@ -250,6 +250,7 @@ cdef class RPCServer:
         self._strings_send(msg)
     cdef _strings_send(self, tuple msg):
         self._send_lock.acquire()
+        print 'msg',msg
         try:
             if hasattr(msg[3],'read'):
                 self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3].read())
