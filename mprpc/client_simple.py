@@ -72,7 +72,7 @@ class ClientRPC(object):
         req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
         return self._packer.pack(req)
     def _msgpack__parse_response(self,response):
-        if (len(response) != 5 or response[0] != MSGPACKRPC_RESPONSE):
+        if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')
         (_, msg_id, error, result) = response
         if msg_id != self._msg_id:
