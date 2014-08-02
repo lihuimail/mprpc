@@ -77,6 +77,7 @@ cdef class RPCServer:
             else:
                 self._unpacker.feed(rpc_type)
                 result=self._msgpack_run()
+            print '666666',result
             if result==-1:
                 logging.debug('Client disconnected')
                 break
