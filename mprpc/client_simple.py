@@ -16,6 +16,7 @@ MSGPACKRPC_RESPONSE = 1
 SOCKET_RECV_SIZE = 1024 ** 2
 #MSGPACK,STRINGS,PICKLES
 METHOD_RECV_SIZE = 8
+METHOD_STRING_SIZE = 30
 
 class RPCProtocolError(Exception):
     pass
@@ -133,23 +134,30 @@ class ClientSTR(ClientRPC):
     def strings_call(self, method, *args,**kwargs):
         req = self._strings_create_request(method, args,kwargs)
         self._socket.sendall(req)
-        data = self._socket.recv(SOCKET_RECV_SIZE)
+        data = self._socket.recv(METHOD_STRING_SIZE)
         if not data:
             raise IOError('Connection closed')
-        return self._strings_parse_response(data)
+        response=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
+        return self._strings_parse_response(response)
     def _strings_create_request(self, method, args,kwargs):
+        #length=30
         self._msg_id += 1
-        req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
+        body=kwargs.get('body')
+        req='%1d%8d%21s'%(MSGPACKRPC_REQUEST, self._msg_id, method)
+        if hasattr(body,'read'):
+            req += body.read()
+        elif body is not None:
+            req += body
         return 'STRINGS:'+req
     def _strings_parse_response(self,response):
-        if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
+        if (len(response) != 3 or int(response[0]) != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')
-        (_, msg_id, error, result) = response
-        if msg_id != self._msg_id:
+        (_, msg_id, error) = response
+        if int(msg_id.lstrip()) != self._msg_id:
             raise RPCError('Invalid Message ID')
         if error:
             raise RPCError(str(error))
-        return result
+        return self._socket
     def call(self, method, *args, **kwargs):
         return self.strings_call(method, *args, **kwargs)
 

@@ -205,12 +205,13 @@ cdef class RPCServer:
         cdef dict kwargs
         cdef int msg_id=0
         cdef int result=0
-        data = self._socket.recv(SOCKET_RECV_SIZE)
+        data = self._socket.recv(METHOD_STRING_SIZE)
         if not data:
             logging.debug('Client disconnected')
             result=-1
             return result
-        (msg_id, method, args, kwargs) = self._strings_parse_request(data)
+        req=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
+        (msg_id, method, args, kwargs) = self._strings_parse_request(req)
         try:
             ret = method(*args,**kwargs)
         except Exception, e:
@@ -222,12 +223,14 @@ cdef class RPCServer:
             result=0
         return result
     cdef tuple _strings_parse_request(self, tuple req):
-        if (len(req) != 5 or req[0] != MSGPACKRPC_REQUEST):
+        if (len(req) != 3 or int(req[0]) != MSGPACKRPC_REQUEST):
             raise RPCProtocolError('Invalid protocol')
-        cdef tuple args
-        cdef dict kwargs
+        cdef tuple args=()
+        cdef dict kwargs={}
         cdef int msg_id=0
-        (_, msg_id, method_name, args ,kwargs) = req
+        (_, msg_id, method_name) = req
+        msg_id=int(msg_id.lstrip())
+        method_name=method_name.lstrip()
         if method_name.startswith('_'):
             raise MethodNotFoundError('Method not callow: %s', method_name)
         if not hasattr(self, method_name):
@@ -235,17 +238,21 @@ cdef class RPCServer:
         method = getattr(self, method_name)
         if not hasattr(method, '__call__'):
             raise MethodNotFoundError('Method is not callable: %s', method_name)
+        kwargs['body']=self._socket
         return (msg_id, method, args, kwargs)
     cdef _strings_send_result(self, object result, int msg_id):
-        msg = (MSGPACKRPC_RESPONSE, msg_id, None, result)
-        self._pickles_send(msg)
+        msg = (MSGPACKRPC_RESPONSE, msg_id,'', result)
+        self._strings_send(msg)
     cdef _strings_send_error(self, str error, int msg_id):
-        msg = (MSGPACKRPC_RESPONSE, msg_id, error, None)
-        self._pickles_send(msg)
+        msg = (MSGPACKRPC_RESPONSE, msg_id, error, '')
+        self._strings_send(msg)
     cdef _strings_send(self, tuple msg):
         self._send_lock.acquire()
         try:
-            self._socket.sendall(pickle.dumps(msg))
+            if hasattr(msg[3],'read'):
+                self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3].read())
+            else:
+                self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3])
         finally:
             self._send_lock.release()
 
