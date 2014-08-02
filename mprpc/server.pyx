@@ -52,26 +52,36 @@ cdef class RPCServer:
         except:
             logging.exception('Failed to clean up the socket')
 
-    #def _run(self):
-    #    cdef bytes rpc_type
-    #    while True:
-    #        rpc_type = self._socket.recv(METHOD_RECV_SIZE)
-    #        if not rpc_type:
-    #            logging.debug('Client disconnected')
-    #            break
-
     def _run(self):
-        self._msgpack_run()
+        cdef bytes rpc_type
+        cdef int result
+        while True:
+            rpc_type = self._socket.recv(METHOD_RECV_SIZE)
+            if not rpc_type:
+                logging.debug('Client disconnected')
+                break
+            if rpc_type=='MSGPACK':
+                result=self._msgpack_run()
+            else:
+                raise
+            if result==-1:
+                logging.debug('Client disconnected')
+                break
+
+    #def _run(self):
+    #    self._msgpack_run()
 
     def _msgpack_run(self):
         cdef bytes data
         cdef tuple req, args
         cdef dict kwargs
         cdef int msg_id
+        cdef int result=0
         while True:
             data = self._socket.recv(SOCKET_RECV_SIZE)
             if not data:
                 logging.debug('Client disconnected')
+                result=-1
                 break
             self._unpacker.feed(data)
             try:
@@ -84,8 +94,11 @@ cdef class RPCServer:
             except Exception, e:
                 logging.exception('An error has occurred')
                 self._msgpack_send_error(str(e), msg_id)
+                result=0
             else:
                 self._msgpack_send_result(ret, msg_id)
+                result=0
+        return result
     cdef tuple _msgpack_parse_request(self, tuple req):
         if (len(req) != 5 or req[0] != MSGPACKRPC_REQUEST):
             raise RPCProtocolError('Invalid protocol')
