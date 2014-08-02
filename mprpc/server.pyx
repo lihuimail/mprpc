@@ -100,7 +100,7 @@ cdef class RPCServer:
             except StopIteration:
                 continue
             (msg_id, method, args, kwargs) = self._msgpack_parse_request(req)
-            print msg_id, method, args, kwargs
+            print '0',msg_id, method, args, kwargs,result
             try:
                 ret = method(*args,**kwargs)
             except Exception, e:
@@ -112,6 +112,7 @@ cdef class RPCServer:
                 self._msgpack_send_result(ret, msg_id)
                 result=0
                 break
+            print '1',msg_id, method, args, kwargs,result
         return result
     cdef tuple _msgpack_parse_request(self, tuple req):
         if (len(req) != 5 or req[0] != MSGPACKRPC_REQUEST):
