@@ -210,7 +210,7 @@ cdef class RPCServer:
             logging.debug('Client disconnected')
             result=-1
             return result
-        (msg_id, method, args, kwargs) = self._strings_parse_request(req)
+        (msg_id, method, args, kwargs) = self._strings_parse_request(data)
         try:
             ret = method(*args,**kwargs)
         except Exception, e:
