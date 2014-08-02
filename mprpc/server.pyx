@@ -211,9 +211,7 @@ cdef class RPCServer:
             result=-1
             return result
         req=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
-        print req
         (msg_id, method, args, kwargs) = self._strings_parse_request(req)
-        print msg_id, method, args, kwargs
         try:
             ret = method(*args,**kwargs)
         except Exception, e:
@@ -232,7 +230,6 @@ cdef class RPCServer:
         cdef int msg_id=0
         msg_id=int(req[1].lstrip())
         method_name=req[2].lstrip()
-        print msg_id,method_name
         if method_name.startswith('_'):
             raise MethodNotFoundError('Method not callow: %s', method_name)
         if not hasattr(self, method_name):
@@ -250,7 +247,6 @@ cdef class RPCServer:
         self._strings_send(msg)
     cdef _strings_send(self, tuple msg):
         self._send_lock.acquire()
-        print 'msg',msg
         try:
             if hasattr(msg[3],'read'):
                 self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3].read())
