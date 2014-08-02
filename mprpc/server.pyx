@@ -7,7 +7,7 @@ import urllib
 import cPickle as pickle
 from gevent.coros import Semaphore
 
-from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRING_SIZE
+from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
 from exceptions import MethodNotFoundError, RPCProtocolError
 
 def decode_urihttp(url=None):
@@ -15,7 +15,7 @@ def decode_urihttp(url=None):
     kwargs={}
     method='default'
     if key is None:
-        return method,[],kwargs
+        return method,tuple(),kwargs
     if key.find('?')==-1 and key.find('|')!=-1:
         key=key.replace('|','?')
     if key.find('?')!=-1:
@@ -34,7 +34,7 @@ def decode_urihttp(url=None):
     if method=='':
         method='default'
     if k2=='':
-        return method,args,kwargs
+        return method,tuple(args),kwargs
     for v in k2.split('&'):
         if not v:
             continue
@@ -44,7 +44,7 @@ def decode_urihttp(url=None):
         if k5.find('%')!=-1:
             k5=urllib.unquote(k5)
         kwargs[k4]=k5
-    result=method,args,kwargs
+    result=method,tuple(args),kwargs
     return result
 
 cdef class RPCServer:
@@ -247,12 +247,12 @@ cdef class RPCServer:
         cdef dict kwargs
         cdef int msg_id=0
         cdef int result=0
-        data = self._socket.recv(METHOD_STRING_SIZE)
+        data = self._socket.recv(METHOD_STRINGS_SIZE)
         if not data:
             logging.debug('Client disconnected')
             result=-1
             return result
-        req=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
+        req=data[0:1],data[1:9],data[9:METHOD_STRINGS_SIZE]
         (msg_id, method, args, kwargs) = self._strings_parse_request(req)
         try:
             ret = method(*args,**kwargs)
@@ -304,12 +304,12 @@ cdef class RPCServer:
         cdef dict kwargs
         cdef int msg_id=0
         cdef int result=0
-        data = self._socket.recv(METHOD_STRING_SIZE)
+        data = self._socket.recv(METHOD_URIHTTP_SIZE)
         if not data:
             logging.debug('Client disconnected')
             result=-1
             return result
-        req=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
+        req=decode_urihttp(url=data)
         (msg_id, method, args, kwargs) = self._urihttp_parse_request(req)
         try:
             ret = method(*args,**kwargs)
@@ -322,13 +322,14 @@ cdef class RPCServer:
             result=0
         return result
     cdef tuple _urihttp_parse_request(self, tuple req):
-        if (len(req) != 3 or int(req[0]) != MSGPACKRPC_REQUEST):
+        if len(req) != 3:
             raise RPCProtocolError('Invalid protocol')
         cdef tuple args=()
         cdef dict kwargs={}
         cdef int msg_id=0
-        msg_id=int(req[1].lstrip())
-        method_name=req[2].lstrip()
+        method_name=req[0]
+        args=req[1]
+        kwargs=req[2]
         if method_name.startswith('_'):
             raise MethodNotFoundError('Method not callow: %s', method_name)
         if not hasattr(self, method_name):
@@ -337,6 +338,9 @@ cdef class RPCServer:
         if not hasattr(method, '__call__'):
             raise MethodNotFoundError('Method is not callable: %s', method_name)
         kwargs['body']=self._socket
+        if kwargs.has_key('msg_id'):
+            msg_id=int(kwargs.get('msg_id'))
+            del kwargs['msg_id']
         return (msg_id, method, args, kwargs)
     cdef _urihttp_send_result(self, object result, int msg_id):
         msg = (MSGPACKRPC_RESPONSE, msg_id,'', result)

@@ -17,7 +17,8 @@ MSGPACKRPC_RESPONSE = 1
 SOCKET_RECV_SIZE = 1024 ** 2
 #MSGPACK,STRINGS,PICKLES
 METHOD_RECV_SIZE = 8
-METHOD_STRING_SIZE = 30
+METHOD_STRINGS_SIZE = 30
+METHOD_URIHTTP_SIZE = 512
 
 class RPCProtocolError(Exception):
     pass
@@ -164,10 +165,10 @@ class ClientSTR(ClientRPC):
     def strings_call(self, method, *args,**kwargs):
         req = self._strings_create_request(method, args,kwargs)
         self._socket.sendall(req)
-        data = self._socket.recv(METHOD_STRING_SIZE)
+        data = self._socket.recv(METHOD_STRINGS_SIZE)
         if not data:
             raise IOError('Connection closed')
-        response=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
+        response=data[0:1],data[1:9],data[9:METHOD_STRINGS_SIZE]
         return self._strings_parse_response(response)
     def _strings_create_request(self, method, args,kwargs):
         #length=30
@@ -248,10 +249,10 @@ class ClientURI(ClientRPC):
     def urihttp_call(self, method, *args,**kwargs):
         req = self._urihttp_create_request(method, args,kwargs)
         self._socket.sendall(req)
-        data = self._socket.recv(METHOD_STRING_SIZE)
+        data = self._socket.recv(METHOD_STRINGS_SIZE)
         if not data:
             raise IOError('Connection closed')
-        response=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
+        response=data[0:1],data[1:9],data[9:METHOD_STRINGS_SIZE]
         return self._urihttp_parse_response(response)
     def _urihttp_create_request(self, method, args,kwargs):
         #length=30
