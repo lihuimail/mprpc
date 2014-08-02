@@ -58,6 +58,15 @@ def call_using_connection_pool():
     print 'call_using_connection_pool: %d qps' % (NUM_CALLS / (time.time() - start))
 
 
+
+def call4():
+    from mprpc import STRSimple
+    client = STRSimple('127.0.0.1', 6000)
+    start = time.time()
+    #[client.call('bday', body='1234') for _ in xrange(NUM_CALLS)]
+    #print 'call2: %d qps' % (NUM_CALLS / (time.time() - start))
+    print client.call('bday', body='1234').recv()
+
 if __name__ == '__main__':
     #p = multiprocessing.Process(target=run_sum_server)
     #p.start()
@@ -66,6 +75,7 @@ if __name__ == '__main__':
 
     call1()
     call2()
+    call4()
 
     call_using_connection_pool()
 
