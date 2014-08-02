@@ -80,6 +80,6 @@ class ClientRPC(object):
         if error:
             raise RPCError(str(error))
         return result
-    def call(self, str method, *args, **kwargs):
+    def call(self, method, *args, **kwargs):
         return self.msgpack_call(method, *args, **kwargs)
 
