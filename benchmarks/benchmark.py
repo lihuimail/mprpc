@@ -21,6 +21,9 @@ def run_sum_server():
 def call():
     from mprpc import RPCClient
     from mprpc import RPCSimple
+    from mprpc import PIKSimple
+
+    print "PIKSimple('127.0.0.1', 6000).call('sum', 1, 2)",PIKSimple('127.0.0.1', 6000).call('sum', 1, 2) 
 
     print "RPCSimple('127.0.0.1', 6000).call('sum', 1, 2)",RPCSimple('127.0.0.1', 6000).call('sum', 1, 2) 
 

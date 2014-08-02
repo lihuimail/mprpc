@@ -10,5 +10,6 @@ except:
     pass
 try:
     from client_simple import ClientRPC as RPCSimple
+    from client_simple import ClientPIK as PIKSimple
 except:
     pass

@@ -54,7 +54,7 @@ class ClientRPC(object):
         else:
             return False
     def msgpack_call(self, method, *args,**kwargs):
-        req = self._msgpack__create_request(method, args,kwargs)
+        req = self._msgpack_create_request(method, args,kwargs)
         self._socket.sendall(req)
         while True:
             data = self._socket.recv(SOCKET_RECV_SIZE)
@@ -66,12 +66,12 @@ class ClientRPC(object):
                 break
             except StopIteration:
                 continue
-        return self._msgpack__parse_response(response)
-    def _msgpack__create_request(self, method, args,kwargs):
+        return self._msgpack_parse_response(response)
+    def _msgpack_create_request(self, method, args,kwargs):
         self._msg_id += 1
         req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
         return 'MSGPACK'+self._packer.pack(req)
-    def _msgpack__parse_response(self,response):
+    def _msgpack_parse_response(self,response):
         if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')
         (_, msg_id, error, result) = response
@@ -82,4 +82,41 @@ class ClientRPC(object):
         return result
     def call(self, method, *args, **kwargs):
         return self.msgpack_call(method, *args, **kwargs)
+
+
+class ClientPIK(ClientRPC):
+    def __init__(self, host, port, timeout=None, lazy=False,pack_encoding='utf-8', unpack_encoding='utf-8'):
+        self._host = host
+        self._port = port
+        self._timeout = timeout
+        self._msg_id = 0
+        self._socket = None
+        if not lazy:
+            self.open()
+    def pickles_call(self, method, *args,**kwargs):
+        req = self._pickles_create_request(method, args,kwargs)
+        self._socket.sendall(req)
+        data = self._socket.recv(SOCKET_RECV_SIZE)
+        if not data:
+            raise IOError('Connection closed')
+        try:
+            response = pickle.loads(data)
+        except:
+            raise
+        return self._pickles_parse_response(response)
+    def _pickles_create_request(self, method, args,kwargs):
+        self._msg_id += 1
+        req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
+        return 'PICKLES'+pickle.dumps(req)
+    def _pickles_parse_response(self,response):
+        if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
+            raise RPCProtocolError('Invalid protocol')
+        (_, msg_id, error, result) = response
+        if msg_id != self._msg_id:
+            raise RPCError('Invalid Message ID')
+        if error:
+            raise RPCError(str(error))
+        return result
+    def call(self, method, *args, **kwargs):
+        return self.pickles_call(method, *args, **kwargs)
 
