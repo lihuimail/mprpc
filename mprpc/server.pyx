@@ -70,7 +70,7 @@ cdef class RPCServer:
             elif rpc_type=='PICKLES:':
                 result=self._pickles_run()
             elif rpc_type=='URIHTTP:':
-                raise
+                result=self._urihttp_run()
             elif rpc_type=='UNKOWNS:':
                 raise
             elif rpc_type=='BUFFERS:':
@@ -251,6 +251,63 @@ cdef class RPCServer:
         msg = (MSGPACKRPC_RESPONSE, msg_id, error, '')
         self._strings_send(msg)
     cdef _strings_send(self, tuple msg):
+        self._send_lock.acquire()
+        try:
+            if hasattr(msg[3],'read'):
+                self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3].read())
+            else:
+                self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3])
+        finally:
+            self._send_lock.release()
+
+    #####################################################
+    cdef int _urihttp_run(self):
+        cdef bytes data
+        cdef tuple req, args
+        cdef dict kwargs
+        cdef int msg_id=0
+        cdef int result=0
+        data = self._socket.recv(METHOD_STRING_SIZE)
+        if not data:
+            logging.debug('Client disconnected')
+            result=-1
+            return result
+        req=data[0:1],data[1:9],data[9:METHOD_STRING_SIZE]
+        (msg_id, method, args, kwargs) = self._urihttp_parse_request(req)
+        try:
+            ret = method(*args,**kwargs)
+        except Exception, e:
+            logging.exception('An error has occurred')
+            self._urihttp_send_error(str(e), msg_id)
+            result=0
+        else:
+            self._urihttp_send_result(ret, msg_id)
+            result=0
+        return result
+    cdef tuple _urihttp_parse_request(self, tuple req):
+        if (len(req) != 3 or int(req[0]) != MSGPACKRPC_REQUEST):
+            raise RPCProtocolError('Invalid protocol')
+        cdef tuple args=()
+        cdef dict kwargs={}
+        cdef int msg_id=0
+        msg_id=int(req[1].lstrip())
+        method_name=req[2].lstrip()
+        if method_name.startswith('_'):
+            raise MethodNotFoundError('Method not callow: %s', method_name)
+        if not hasattr(self, method_name):
+            raise MethodNotFoundError('Method not found: %s', method_name)
+        method = getattr(self, method_name)
+        if not hasattr(method, '__call__'):
+            raise MethodNotFoundError('Method is not callable: %s', method_name)
+        kwargs['body']=self._socket
+        return (msg_id, method, args, kwargs)
+    cdef _urihttp_send_result(self, object result, int msg_id):
+        msg = (MSGPACKRPC_RESPONSE, msg_id,'', result)
+        self._urihttp_send(msg)
+    cdef _urihttp_send_error(self, str error, int msg_id):
+        msg = (MSGPACKRPC_RESPONSE, msg_id, error, '')
+        self._urihttp_send(msg)
+    cdef _urihttp_send(self, tuple msg):
         self._send_lock.acquire()
         try:
             if hasattr(msg[3],'read'):
