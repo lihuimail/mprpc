@@ -53,6 +53,9 @@ cdef class RPCServer:
             logging.exception('Failed to clean up the socket')
 
     def _run(self):
+        self._msgpack_run()
+
+    def _msgpack_run(self):
         cdef bytes data
         cdef tuple req, args
         cdef dict kwargs
@@ -75,7 +78,6 @@ cdef class RPCServer:
                 self._msgpack_send_error(str(e), msg_id)
             else:
                 self._msgpack_send_result(ret, msg_id)
-
     cdef tuple _msgpack_parse_request(self, tuple req):
         if (len(req) != 5 or req[0] != MSGPACKRPC_REQUEST):
             raise RPCProtocolError('Invalid protocol')
