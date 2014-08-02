@@ -82,7 +82,7 @@ cdef class RPCServer:
     #def _run(self):
     #    self._msgpack_run()
 
-    def _msgpack_run(self):
+    cdef int  _msgpack_run(self):
         cdef bytes data
         cdef tuple req, args
         cdef dict kwargs
@@ -140,7 +140,7 @@ cdef class RPCServer:
         finally:
             self._send_lock.release()
 
-    def _pickles_run(self):
+    cdef int _pickles_run(self):
         cdef bytes data
         cdef tuple req, args
         cdef dict kwargs
