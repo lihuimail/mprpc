@@ -29,7 +29,7 @@ def decode_urihttp(url=None):
     if method.find('/')==-1:
         k8=''
     else:
-        method,k8=k1.split('/',1)
+        method,k8=method.split('/',1)
     args=[v for v in k8.split('/') if v]
     if method=='':
         method='default'
