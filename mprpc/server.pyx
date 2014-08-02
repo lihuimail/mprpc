@@ -69,14 +69,16 @@ cdef class RPCServer:
                 result=self._strings_run()
             elif rpc_type=='PICKLES:':
                 result=self._pickles_run()
+            elif rpc_type=='URIHTTP:':
+                raise
             elif rpc_type=='UNKOWNS:':
-                pass
+                raise
             elif rpc_type=='BUFFERS:':
-                pass
+                raise
             elif rpc_type=='JSONSTR:':
-                pass
+                raise
             elif rpc_type=='BSONSTR:':
-                pass
+                raise
             else:
                 self._unpacker.feed(rpc_type)
                 result=self._msgpack_run()
