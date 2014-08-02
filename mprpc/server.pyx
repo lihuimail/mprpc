@@ -153,7 +153,7 @@ cdef class RPCServer:
             return result
         try:
             req = pickle.loads(data)
-        except :
+        except Exception, e:
             logging.exception('An error has occurred')
             self._pickles_send_error(str(e), msg_id)
             result=0
