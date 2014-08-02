@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from client import RPCClient, RPCPoolClient
-from server import RPCServer
+try:
+    from client import RPCClient, RPCPoolClient
+except:
+    pass
+try:
+    from server import RPCServer
+except:
+    pass
+try:
+    from client import ClientRPC as RPCSimple
+except:
+    pass
