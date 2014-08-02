@@ -100,6 +100,7 @@ cdef class RPCServer:
             except StopIteration:
                 continue
             (msg_id, method, args, kwargs) = self._msgpack_parse_request(req)
+            print msg_id, method, args, kwargs
             try:
                 ret = method(*args,**kwargs)
             except Exception, e:
