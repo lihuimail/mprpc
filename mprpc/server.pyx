@@ -3,9 +3,10 @@
 
 import logging
 import msgpack
+import cPickle as pickle
 from gevent.coros import Semaphore
 
-from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE
+from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE
 from exceptions import MethodNotFoundError, RPCProtocolError
 
 

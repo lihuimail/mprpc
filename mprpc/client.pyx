@@ -4,11 +4,12 @@
 import logging
 import msgpack
 import time
+import cPickle as pickle
 from gevent import socket
 from gsocketpool.connection import Connection
 
 from exceptions import RPCProtocolError, RPCError
-from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE
+from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE
 
 
 cdef class RPCClient:
