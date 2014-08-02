@@ -150,6 +150,7 @@ class ClientSTR(ClientRPC):
             req += body
         return 'STRINGS:'+req
     def _strings_parse_response(self,response):
+        print response
         if (len(response) != 3 or int(response[0]) != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')
         (_, msg_id, error) = response
