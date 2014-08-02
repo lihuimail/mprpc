@@ -36,6 +36,13 @@ class ClientRPC(object):
         self._unpacker = msgpack.Unpacker(encoding=unpack_encoding, use_list=False)
         if not lazy:
             self.open()
+    def test_connect(self,*args,**kwargs):
+        result=self.call('test_connect',*args,**kwargs)
+        if result=='1':
+            result=True
+        else:
+            result=False
+        return result
     def open(self):
         assert self._socket is None, 'The connection has already been established'
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -160,4 +167,11 @@ class ClientSTR(ClientRPC):
         return self._socket
     def call(self, method, *args, **kwargs):
         return self.strings_call(method, *args, **kwargs)
+    def test_connect(self,*args,**kwargs):
+        result=self.call('test_connect',*args,**kwargs).recv(10)
+        if result=='1':
+            result=True
+        else:
+            result=False
+        return result
 

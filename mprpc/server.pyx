@@ -52,6 +52,9 @@ cdef class RPCServer:
         except:
             logging.exception('Failed to clean up the socket')
 
+    def test_connect(self,*args,**kwargs):
+        return '1'
+
     def _run(self):
         cdef bytes rpc_type
         cdef int result=0
