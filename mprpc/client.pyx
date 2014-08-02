@@ -83,9 +83,9 @@ cdef class RPCClient:
         req = (MSGPACKRPC_REQUEST, self._msg_id, method, args, kwargs)
         return self._packer.pack(req)
     cdef _msgpack_parse_response(self, tuple response):
+        cdef int msg_id
         if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')
-        cdef int msg_id
         (_, msg_id, error, result) = response
         if msg_id != self._msg_id:
             raise RPCError('Invalid Message ID')
