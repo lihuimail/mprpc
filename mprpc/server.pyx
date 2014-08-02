@@ -52,6 +52,14 @@ cdef class RPCServer:
         except:
             logging.exception('Failed to clean up the socket')
 
+    #def _run(self):
+    #    cdef bytes rpc_type
+    #    while True:
+    #        rpc_type = self._socket.recv(METHOD_RECV_SIZE)
+    #        if not rpc_type:
+    #            logging.debug('Client disconnected')
+    #            break
+
     def _run(self):
         self._msgpack_run()
 

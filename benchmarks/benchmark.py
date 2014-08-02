@@ -23,6 +23,8 @@ def call():
 
     client = RPCClient('127.0.0.1', 6000)
 
+    print "client.call('sum', 1, 2) ",client.call('sum', 1, 2) 
+
     start = time.time()
     [client.call('sum', 1, 2) for _ in xrange(NUM_CALLS)]
 
