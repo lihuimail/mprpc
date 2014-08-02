@@ -95,9 +95,11 @@ cdef class RPCServer:
                 logging.exception('An error has occurred')
                 self._msgpack_send_error(str(e), msg_id)
                 result=0
+                break
             else:
                 self._msgpack_send_result(ret, msg_id)
                 result=0
+                break
         return result
     cdef tuple _msgpack_parse_request(self, tuple req):
         if (len(req) != 5 or req[0] != MSGPACKRPC_REQUEST):
