@@ -58,12 +58,12 @@ def call_using_connection_pool():
 
 
 if __name__ == '__main__':
-    p = multiprocessing.Process(target=run_sum_server)
-    p.start()
+    #p = multiprocessing.Process(target=run_sum_server)
+    #p.start()
 
     time.sleep(1)
 
     call()
     call_using_connection_pool()
 
-    p.terminate()
+    #p.terminate()
