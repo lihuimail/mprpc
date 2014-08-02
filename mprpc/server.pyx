@@ -57,6 +57,7 @@ cdef class RPCServer:
         cdef int result=0
         while True:
             rpc_type = self._socket.recv(METHOD_RECV_SIZE)
+            print '222222222',rpc_type
             if not rpc_type:
                 logging.debug('Client disconnected')
                 break
