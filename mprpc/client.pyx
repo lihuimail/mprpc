@@ -179,7 +179,7 @@ class RPCPoolClient(RPCClient, Connection):
         """
         try:
             return RPCClient.call(self, method, *args, **kwargs)
-        except socket.timeout:
+        except gevent.socket.timeout:
             self.reconnect()
             raise
         except IOError:
