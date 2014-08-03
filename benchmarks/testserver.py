@@ -14,6 +14,7 @@ def run_sum_server():
             print 'result',result
             return result
         def test(self,a1=None,a2=None):
+            print '11111111111111',a1,a2
             return a1
 
     server = StreamServer(('127.0.0.1', 6000), SumServer)

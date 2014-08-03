@@ -61,6 +61,8 @@ class ClientRPC(object):
         if not lazy:
             self.open()
     def test_connect(self,*args,**kwargs):
+        if not  self._socket:
+            return False
         result=self.call('test_connect',*args,**kwargs)
         if result=='1':
             result=True

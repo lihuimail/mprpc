@@ -81,13 +81,13 @@ if __name__ == '__main__':
     #p = multiprocessing.Process(target=run_sum_server)
     #p.start()
 
-    call0()
+    #call0()
 
-    call1()
-    call2()
-    call4()
+    #$call1()
+    #call2()
+    #call4()
     call5()
 
-    call_using_connection_pool()
+    #call_using_connection_pool()
 
     #p.terminate()
