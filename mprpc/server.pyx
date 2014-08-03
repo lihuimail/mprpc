@@ -110,6 +110,8 @@ cdef class RPCServer:
                 result=self._urihttp_run()
             elif rpc_type=='UNKOWNS:':
                 raise
+            elif rpc_type=='FILEOBJ:':
+                raise
             elif rpc_type=='BUFFERS:':
                 raise
             elif rpc_type=='JSONSTR:':
