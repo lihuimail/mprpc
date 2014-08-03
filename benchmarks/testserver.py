@@ -13,6 +13,8 @@ def run_sum_server():
             result=body.recv(1000)
             print 'result',result
             return result
+        def test(self,a1=None,a2=None):
+            return a1
 
     server = StreamServer(('127.0.0.1', 6000), SumServer)
     server.serve_forever()

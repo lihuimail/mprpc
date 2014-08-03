@@ -18,7 +18,6 @@ try:
     import gevent
 except:
     pass
-import socket
 try:
     from gsocketpool.connection import Connection
 except:

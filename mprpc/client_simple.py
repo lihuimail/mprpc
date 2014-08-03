@@ -263,7 +263,7 @@ class ClientURI(ClientRPC):
             req += body.read()
         elif body is not None:
             req += body
-        return 'STRINGS:'+req
+        return 'URIHTTP:'+req
     def _urihttp_parse_response(self,response):
         if (len(response) != 3 or int(response[0]) != MSGPACKRPC_RESPONSE):
             raise RPCProtocolError('Invalid protocol')

@@ -311,6 +311,7 @@ cdef class RPCServer:
             return result
         req=decode_urihttp(url=data)
         (msg_id, method, args, kwargs) = self._urihttp_parse_request(req)
+        print (msg_id, method, args, kwargs)
         try:
             ret = method(*args,**kwargs)
         except Exception, e:

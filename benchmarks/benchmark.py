@@ -67,6 +67,16 @@ def call4():
     #print 'call2: %d qps' % (NUM_CALLS / (time.time() - start))
     print client.call('bday', body='1234').recv(100)
 
+
+def call5():
+    from mprpc import URISimple
+    client = URISimple('127.0.0.1', 6000)
+    start = time.time()
+    #[client.call('bday', body='1234') for _ in xrange(NUM_CALLS)]
+    #print 'call2: %d qps' % (NUM_CALLS / (time.time() - start))
+    print client.call('test', a1='1234',a2='33').recv(100)
+
+
 if __name__ == '__main__':
     #p = multiprocessing.Process(target=run_sum_server)
     #p.start()
@@ -76,6 +86,7 @@ if __name__ == '__main__':
     call1()
     call2()
     call4()
+    call5()
 
     call_using_connection_pool()
 
