@@ -255,10 +255,13 @@ class ClientURI(ClientRPC):
         response=data[0:1],data[1:9],data[9:METHOD_STRINGS_SIZE]
         return self._urihttp_parse_response(response)
     def _urihttp_create_request(self, method, args,kwargs):
-        #length=30
+        #length=512
         self._msg_id += 1
+        kwargs['msg_id']=self._msg_id
         body=kwargs.get('body')
-        req='%1d%8d%21s'%(MSGPACKRPC_REQUEST, self._msg_id, method)
+        if kwargs.has_key('body'):
+            del kwargs['body']
+        req=encode_urihttp(method=method,args=args,kwargs=kwargs)
         if hasattr(body,'read'):
             req += body.read()
         elif body is not None:
