@@ -13,7 +13,7 @@ def run_sum_server():
             result=self._system_read(1000)
             print 'result',result
             return result
-        def test(self,*args,*kwargs):
+        def test(self,*args,**kwargs):
             print '11111111111111',args,kwargs
             return 'ok'
 
