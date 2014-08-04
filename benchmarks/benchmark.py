@@ -75,6 +75,7 @@ def call5():
     start = time.time()
     #[client.call('bday', body='1234') for _ in xrange(NUM_CALLS)]
     #print 'call2: %d qps' % (NUM_CALLS / (time.time() - start))
+    print client.test_connect()
     print client.call('test', a1='1234',a2='33').recv(100)
     print client.call('test', a1='1234',a2='33').recv(100)
     print client.call('test', a1='1234',a2='33').recv(100)
