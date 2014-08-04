@@ -1,14 +1,14 @@
 # cython: profile=False
 # -*- coding: utf-8 -*-
 
+import urllib
 import logging
 import msgpack
-import urllib
 import cPickle as pickle
 from gevent.coros import Semaphore
 
-from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
 from exceptions import MethodNotFoundError, RPCProtocolError
+from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
 
 def decode_urihttp(url=None):
     key=url
