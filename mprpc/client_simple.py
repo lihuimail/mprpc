@@ -198,9 +198,15 @@ def encode_urihttp(method=None,args=None,kwargs=None):
         v=urllib.quote(v)
         m1.append('%s=%s'%(k,v))
     if m1:
-        result=method+'?'+'&'.join(m1)
+        if method.find('?')!=-1:
+            result=method+'&'+'&'.join(m1)
+        else:
+            result=method+'?'+'&'.join(m1)
     else:
         result=method
+    if len(result)>METHOD_URIHTTP_SIZE:
+        raise
+    result+=' '*(METHOD_URIHTTP_SIZE-len(result))
     return result
 
 class ClientURI(ClientRPC):

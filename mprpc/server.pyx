@@ -11,39 +11,39 @@ from exceptions import MethodNotFoundError, RPCProtocolError
 from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
 
 def decode_urihttp(url=None):
-    key=url
     kwargs={}
     method='default'
-    if key is None:
+    if url is None:
         return method,tuple(),kwargs
-    if key.find('?')==-1 and key.find('|')!=-1:
-        key=key.replace('|','?')
-    if key.find('?')!=-1:
-        method,k2=key.split('?',1)
-        if k2.find('#')!=-1:
-            k2=k2.split('#')[0]
+    url=url.strip()
+    if url.find('?')==-1 and url.find('|')!=-1:
+        url=url.replace('|','?')
+    if url.find('?')!=-1:
+        method,a1=url.split('?',1)
+        if a1.find('#')!=-1:
+            a1=a1.split('#')[0]
     else:
-        method=key
-        k2=''
+        method=url
+        a1=''
     method='/'.join([v.strip() for v in method.strip('/').split('/') if v.strip()])
     if method.find('/')==-1:
-        k8=''
+        a2=''
     else:
-        method,k8=method.split('/',1)
-    args=[v for v in k8.split('/') if v]
+        method,a2=method.split('/',1)
+    args=[v for v in a2.split('/') if v]
     if method=='':
         method='default'
-    if k2=='':
+    if a1=='':
         return method,tuple(args),kwargs
-    for v in k2.split('&'):
+    for v in a1.split('&'):
         if not v:
             continue
         elif v.find('=')==-1:
             continue
-        k4,k5=v.split('=',1)
-        if k5.find('%')!=-1:
-            k5=urllib.unquote(k5)
-        kwargs[k4]=k5
+        v1,v2=v.split('=',1)
+        if v2.find('%')!=-1:
+            v2=urllib.unquote(v2)
+        kwargs[v1]=v2
     result=method,tuple(args),kwargs
     return result
 
@@ -359,7 +359,6 @@ cdef class RPCServer:
         method = getattr(self, method_name)
         if not hasattr(method, '__call__'):
             raise MethodNotFoundError('Method is not callable: %s', method_name)
-        kwargs['body']=self._socket
         if kwargs.has_key('msg_id'):
             msg_id=int(kwargs.get('msg_id'))
             del kwargs['msg_id']
