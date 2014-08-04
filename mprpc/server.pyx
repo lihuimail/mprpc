@@ -124,11 +124,11 @@ cdef class RPCServer:
             if result==-1:
                 logging.debug('Client disconnected')
                 break
-    def _get_handle(self):
+    def get_handle(self):
         return self._socket
-    cdef bytes _read(self,int length):
+    cdef bytes handle_read(self,int length):
         return self._socket.recv(length)
-    cdef bytes _write(self,bytes value):
+    cdef bytes handle_write(self,bytes value):
         self._send_lock.acquire()
         try:
             self._socket.sendall(value)
