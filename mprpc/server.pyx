@@ -10,6 +10,7 @@ from gevent.coros import Semaphore
 from exceptions import MethodNotFoundError, RPCProtocolError
 from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
 
+#####################################################
 def decode_urihttp(url=None):
     kwargs={}
     method='default'
@@ -47,6 +48,7 @@ def decode_urihttp(url=None):
     result=method,tuple(args),kwargs
     return result
 
+#####################################################
 cdef class RPCServer:
     """RPC server.
 
@@ -77,6 +79,7 @@ cdef class RPCServer:
     cdef _unpacker
     cdef _send_lock
 
+    #####################################################
     def __init__(self, sock, address, pack_encoding='utf-8',unpack_encoding='utf-8'):
         self._socket = sock
         self._packer = msgpack.Packer(encoding=pack_encoding)
@@ -89,9 +92,7 @@ cdef class RPCServer:
         except:
             logging.exception('Failed to clean up the socket')
 
-    def test_connect(self,*args,**kwargs):
-        return '1'
-
+    #####################################################
     def _run(self):
         cdef bytes rpc_type
         cdef int result=0
@@ -124,6 +125,12 @@ cdef class RPCServer:
             if result==-1:
                 logging.debug('Client disconnected')
                 break
+
+    #####################################################
+    def test_connect(self,*args,**kwargs):
+        return '1'
+
+    #####################################################
     def _get_handle(self):
         return self._socket
     cdef bytes _handle_read(self,int length):
@@ -332,7 +339,6 @@ cdef class RPCServer:
             return result
         req=decode_urihttp(url=data)
         (msg_id, method, args, kwargs) = self._urihttp_parse_request(req)
-        print (msg_id, method, args, kwargs)
         try:
             ret = method(*args,**kwargs)
         except Exception, e:

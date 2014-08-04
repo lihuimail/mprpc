@@ -39,6 +39,7 @@ class ClientRPC(object):
         self._unpacker = msgpack.Unpacker(encoding=unpack_encoding, use_list=False)
         if not lazy:
             self.open()
+        print dir(self._socket)
     def test_connect(self,*args,**kwargs):
         if not  self._socket:
             return False
