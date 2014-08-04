@@ -39,7 +39,6 @@ class ClientRPC(object):
         self._unpacker = msgpack.Unpacker(encoding=unpack_encoding, use_list=False)
         if not lazy:
             self.open()
-        print dir(self._socket)
     def test_connect(self,*args,**kwargs):
         if not  self._socket:
             return False
@@ -219,6 +218,7 @@ class ClientURI(ClientRPC):
         self._socket = None
         if not lazy:
             self.open()
+        print dir(self._socket)
     def urihttp_call(self, method, *args,**kwargs):
         req = self._urihttp_create_request(method, args,kwargs)
         self._socket.sendall(req)
