@@ -9,8 +9,8 @@ def run_sum_server():
     class SumServer(RPCServer):
         def sum(self, x, y):
             return x + y
-        def bday(self,body=None):
-            result=body.recv(1000)
+        def bday(self):
+            result=self._read(1000)
             print 'result',result
             return result
         def test(self,a1=None,a2=None):
