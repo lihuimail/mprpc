@@ -10,7 +10,7 @@ def run_sum_server():
         def sum(self, x, y):
             return x + y
         def bday(self):
-            result=self._read(1000)
+            result=self.handle_read(1000)
             print 'result',result
             return result
         def test(self,a1=None,a2=None):
