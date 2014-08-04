@@ -135,6 +135,15 @@ cdef class RPCServer:
         finally:
             self._send_lock.release()
         return True
+    def system_read(self,length):
+        return self._socket.recv(length)
+    def system_write(self,value):
+        self._send_lock.acquire()
+        try:
+            self._socket.sendall(value)
+        finally:
+            self._send_lock.release()
+        return True
 
     #####################################################
     cdef int  _msgpack_run(self):
