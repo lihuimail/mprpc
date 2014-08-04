@@ -359,9 +359,9 @@ cdef class RPCServer:
         method = getattr(self, method_name)
         if not hasattr(method, '__call__'):
             raise MethodNotFoundError('Method is not callable: %s', method_name)
-        if kwargs.has_key('msg_id'):
-            msg_id=int(kwargs.get('msg_id'))
-            del kwargs['msg_id']
+        if kwargs.has_key('msgsysid'):
+            msg_id=int(kwargs.get('msgsysid'))
+            del kwargs['msgsysid']
         return (msg_id, method, args, kwargs)
     cdef _urihttp_send_result(self, object result, int msg_id):
         msg = (MSGPACKRPC_RESPONSE, msg_id,'', result)

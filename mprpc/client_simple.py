@@ -229,7 +229,7 @@ class ClientURI(ClientRPC):
     def _urihttp_create_request(self, method, args,kwargs):
         #length=512
         self._msg_id += 1
-        kwargs['msg_id']=self._msg_id
+        kwargs['msgsysid']=self._msg_id
         body=kwargs.get('body')
         if kwargs.has_key('body'):
             del kwargs['body']

@@ -68,6 +68,7 @@ def call4():
     print client.call('bday', '1234').recv(100)
 
 
+
 def call5():
     from mprpc import URISimple
     client = URISimple('127.0.0.1', 6000)
