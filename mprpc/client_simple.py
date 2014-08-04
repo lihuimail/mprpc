@@ -27,28 +27,7 @@ class MethodNotFoundError(Exception):
 class RPCError(Exception):
     pass
 
-
-def encode_urihttp(method=None,args=None,kwargs=None):
-    m1=[]
-    if method is None or method=='':
-        method='default'
-    if args:
-        method+='/'+'/'.join(args)
-    for k,v in sorted(kwargs.items()):
-        if v is None:
-            continue
-        if type(v)==unicode:
-            v=v.encode('utf-8')
-        elif type(v)!=str:
-            v=str(v)
-        v=urllib.quote(v)
-        m1.append('%s=%s'%(k,v))
-    if m1:
-        result=method+'?'+'&'.join(m1)
-    else:
-        result=method
-    return result
-
+#####################################
 class ClientRPC(object):
     def __init__(self, host, port, timeout=None, lazy=False,pack_encoding='utf-8', unpack_encoding='utf-8'):
         self._host = host
@@ -173,9 +152,11 @@ class ClientSTR(ClientRPC):
         response=data[0:1],data[1:9],data[9:METHOD_STRINGS_SIZE]
         return self._strings_parse_response(response)
     def _strings_create_request(self, method, args,kwargs):
-        #length=30
         self._msg_id += 1
-        body=kwargs.get('body')
+        if not args:
+            body=None
+        else:
+            body=args[0]
         req='%1d%8d%21s'%(MSGPACKRPC_REQUEST, self._msg_id, method)
         if hasattr(body,'read'):
             req += body.read()
@@ -201,43 +182,26 @@ class ClientSTR(ClientRPC):
             result=False
         return result
 
-
-class ClientPIK(ClientRPC):
-    def __init__(self, host, port, timeout=None, lazy=False,pack_encoding='utf-8', unpack_encoding='utf-8'):
-        self._host = host
-        self._port = port
-        self._timeout = timeout
-        self._msg_id = 0
-        self._socket = None
-        if not lazy:
-            self.open()
-    def pickles_call(self, method, *args,**kwargs):
-        req = self._pickles_create_request(method, args,kwargs)
-        self._socket.sendall(req)
-        data = self._socket.recv(SOCKET_RECV_SIZE)
-        if not data:
-            raise IOError('Connection closed')
-        try:
-            response = pickle.loads(data)
-        except:
-            raise
-        return self._pickles_parse_response(response)
-    def _pickles_create_request(self, method, args,kwargs):
-        self._msg_id += 1
-        req = (MSGPACKRPC_REQUEST, self._msg_id, method, args,kwargs)
-        return 'PICKLES:'+pickle.dumps(req)
-    def _pickles_parse_response(self,response):
-        if (len(response) != 4 or response[0] != MSGPACKRPC_RESPONSE):
-            raise RPCProtocolError('Invalid protocol')
-        (_, msg_id, error, result) = response
-        if msg_id != self._msg_id:
-            raise RPCError('Invalid Message ID')
-        if error:
-            raise RPCError(str(error))
-        return result
-    def call(self, method, *args, **kwargs):
-        return self.pickles_call(method, *args, **kwargs)
-
+def encode_urihttp(method=None,args=None,kwargs=None):
+    m1=[]
+    if method is None or method=='':
+        method='default'
+    if args:
+        method+='/'+'/'.join(args)
+    for k,v in sorted(kwargs.items()):
+        if v is None:
+            continue
+        if type(v)==unicode:
+            v=v.encode('utf-8')
+        elif type(v)!=str:
+            v=str(v)
+        v=urllib.quote(v)
+        m1.append('%s=%s'%(k,v))
+    if m1:
+        result=method+'?'+'&'.join(m1)
+    else:
+        result=method
+    return result
 
 class ClientURI(ClientRPC):
     def __init__(self, host, port, timeout=None, lazy=False,pack_encoding='utf-8', unpack_encoding='utf-8'):

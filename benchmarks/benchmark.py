@@ -65,7 +65,7 @@ def call4():
     start = time.time()
     #[client.call('bday', body='1234') for _ in xrange(NUM_CALLS)]
     #print 'call2: %d qps' % (NUM_CALLS / (time.time() - start))
-    print client.call('bday', body='1234').recv(100)
+    print client.call('bday', '1234').recv(100)
 
 
 def call5():
