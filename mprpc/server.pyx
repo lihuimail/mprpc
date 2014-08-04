@@ -292,7 +292,6 @@ cdef class RPCServer:
         method = getattr(self, method_name)
         if not hasattr(method, '__call__'):
             raise MethodNotFoundError('Method is not callable: %s', method_name)
-        kwargs['body']=self._socket
         return (msg_id, method, args, kwargs)
     cdef _strings_send_result(self, object result, int msg_id):
         msg = (MSGPACKRPC_RESPONSE, msg_id,'', result)
