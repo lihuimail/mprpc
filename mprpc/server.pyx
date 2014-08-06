@@ -11,11 +11,9 @@ from exceptions import MethodNotFoundError, RPCProtocolError
 from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
 
 #####################################################
-cdef tuple decode_urihttp(str url):
-    cdef dict kwargs={}
-    cdef str method='default'
-    cdef str a1,a2,v,v1,v2
-    cdef list args
+def decode_urihttp(url=None):
+    kwargs={}
+    method='default'
     if url is None:
         return method,tuple(),kwargs
     url=url.strip()
@@ -339,7 +337,7 @@ cdef class RPCServer:
             logging.debug('Client disconnected')
             result=-1
             return result
-        req=decode_urihttp(data)
+        req=decode_urihttp(url=data)
         (msg_id, method, args, kwargs) = self._urihttp_parse_request(req)
         try:
             ret = method(*args,**kwargs)
