@@ -11,7 +11,7 @@ from exceptions import MethodNotFoundError, RPCProtocolError
 from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
 
 #####################################################
-cdef tuple decode_urihttp(bytes url):
+cdef tuple decode_urihttp(str url):
     cdef dict kwargs={}
     cdef str method='default'
     cdef str a1,a2,v,v1,v2
