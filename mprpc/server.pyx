@@ -11,7 +11,7 @@ from exceptions import MethodNotFoundError, RPCProtocolError
 from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
 
 #####################################################
-def decode_urihttp(url=None):
+cdef tuple decode_urihttp(url):
     kwargs={}
     method='default'
     if url is None:
