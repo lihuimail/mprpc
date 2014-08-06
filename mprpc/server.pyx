@@ -13,8 +13,8 @@ from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,
 #####################################################
 cdef tuple decode_urihttp(bytes url):
     cdef dict kwargs={}
-    cdef bytes method='default'
-    cdef bytes a1,a2,v,v1,v2
+    cdef str method='default'
+    cdef str a1,a2,v,v1,v2
     cdef list args
     if url is None:
         return method,tuple(),kwargs
