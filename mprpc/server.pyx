@@ -339,7 +339,7 @@ cdef class RPCServer:
             logging.debug('Client disconnected')
             result=-1
             return result
-        req=decode_urihttp(url=data)
+        req=decode_urihttp(data)
         (msg_id, method, args, kwargs) = self._urihttp_parse_request(req)
         try:
             ret = method(*args,**kwargs)
