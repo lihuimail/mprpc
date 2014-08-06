@@ -96,7 +96,7 @@ class ClientRPC(object):
     def call(self, method, *args, **kwargs):
         return self.msgpack_call(method, *args, **kwargs)
 
-
+#####################################
 class ClientPIK(ClientRPC):
     def __init__(self, host, port, timeout=None, lazy=False,pack_encoding='utf-8', unpack_encoding='utf-8'):
         self._host = host
@@ -134,6 +134,7 @@ class ClientPIK(ClientRPC):
         return self.pickles_call(method, *args, **kwargs)
 
 
+#####################################
 class ClientSTR(ClientRPC):
     def __init__(self, host, port, timeout=None, lazy=False,pack_encoding='utf-8', unpack_encoding='utf-8'):
         self._host = host
@@ -182,6 +183,7 @@ class ClientSTR(ClientRPC):
             result=False
         return result
 
+#####################################
 def encode_urihttp(method=None,args=None,kwargs=None):
     m1=[]
     if method is None or method=='':
@@ -258,3 +260,22 @@ class ClientURI(ClientRPC):
         else:
             result=False
         return result
+
+#####################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
