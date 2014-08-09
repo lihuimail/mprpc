@@ -17,7 +17,11 @@ except:
     pass
 
 
-def get_client_class(host=None,port=None,timeout=None,lazy=False,pack_encoding='utf-8',unpack_encoding='utf-8',with_type=None):
+def get_client_class(
+        host=None,port=None,
+        timeout=None,lazy=False,pack_encoding='utf-8',unpack_encoding='utf-8',
+        with_type=None
+        ):
     if with_type is None or with_type=='client_normal':
         result=RPCClient(host,port)
     elif with_type=='client_pool':
