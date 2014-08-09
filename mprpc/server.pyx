@@ -5,7 +5,10 @@ import urllib
 import logging
 import msgpack
 import cPickle as pickle
-from gevent.coros import Semaphore
+try:
+    from gevent.coros import Semaphore
+except:
+    pass
 
 from exceptions import MethodNotFoundError, RPCProtocolError
 from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
@@ -84,7 +87,10 @@ cdef class RPCServer:
         self._socket = sock
         self._packer = msgpack.Packer(encoding=pack_encoding)
         self._unpacker = msgpack.Unpacker(encoding=unpack_encoding,use_list=False)
-        self._send_lock = Semaphore()
+        try:
+            self._send_lock = Semaphore()
+        except:
+            self._send_lock = None
         self._run()
     def __del__(self):
         try:
@@ -136,20 +142,24 @@ cdef class RPCServer:
     cdef bytes _handle_read(self,int length):
         return self._socket.recv(length)
     cdef bytes _handle_write(self,bytes value):
-        self._send_lock.acquire()
+        if self._send_lock:
+            self._send_lock.acquire()
         try:
             self._socket.sendall(value)
         finally:
-            self._send_lock.release()
+            if self._send_lock:
+                self._send_lock.release()
         return True
     def _system_read(self,length):
         return self._socket.recv(length)
     def _system_write(self,value):
-        self._send_lock.acquire()
+        if self._send_lock:
+            self._send_lock.acquire()
         try:
             self._socket.sendall(value)
         finally:
-            self._send_lock.release()
+            if self._send_lock:
+                self._send_lock.release()
         return True
 
     #####################################################
@@ -205,11 +215,13 @@ cdef class RPCServer:
         msg = (MSGPACKRPC_RESPONSE, msg_id, error, None)
         self._msgpack_send(msg)
     cdef _msgpack_send(self,tuple  msg):
-        self._send_lock.acquire()
+        if self._send_lock:
+            self._send_lock.acquire()
         try:
             self._socket.sendall(self._packer.pack(msg))
         finally:
-            self._send_lock.release()
+            if self._send_lock:
+                self._send_lock.release()
 
     #####################################################
     cdef int _pickles_run(self):
@@ -263,11 +275,13 @@ cdef class RPCServer:
         msg = (MSGPACKRPC_RESPONSE, msg_id, error, None)
         self._pickles_send(msg)
     cdef _pickles_send(self, tuple msg):
-        self._send_lock.acquire()
+        if self._send_lock:
+            self._send_lock.acquire()
         try:
             self._socket.sendall(pickle.dumps(msg))
         finally:
-            self._send_lock.release()
+            if self._send_lock:
+                self._send_lock.release()
 
     #####################################################
     cdef int _strings_run(self):
@@ -316,14 +330,16 @@ cdef class RPCServer:
         msg = (MSGPACKRPC_RESPONSE, msg_id, error, '')
         self._strings_send(msg)
     cdef _strings_send(self, tuple msg):
-        self._send_lock.acquire()
+        if self._send_lock:
+            self._send_lock.acquire()
         try:
             if hasattr(msg[3],'read'):
                 self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3].read())
             else:
                 self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3])
         finally:
-            self._send_lock.release()
+            if self._send_lock:
+                self._send_lock.release()
 
     #####################################################
     cdef int _urihttp_run(self):
@@ -376,14 +392,16 @@ cdef class RPCServer:
         msg = (MSGPACKRPC_RESPONSE, msg_id, error, '')
         self._urihttp_send(msg)
     cdef _urihttp_send(self, tuple msg):
-        self._send_lock.acquire()
+        if self._send_lock:
+            self._send_lock.acquire()
         try:
             if hasattr(msg[3],'read'):
                 self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3].read())
             else:
                 self._socket.sendall('%1d%8d%21s'%(msg[0],msg[1],msg[2])+msg[3])
         finally:
-            self._send_lock.release()
+            if self._send_lock:
+                self._send_lock.release()
 
     #####################################################
 
