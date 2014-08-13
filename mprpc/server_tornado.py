@@ -4,10 +4,6 @@ import urllib
 import logging
 import msgpack
 import cPickle as pickle
-try:
-    from gevent.coros import Semaphore
-except:
-    pass
 
 from exceptions import MethodNotFoundError, RPCProtocolError
 from constants import MSGPACKRPC_REQUEST, MSGPACKRPC_RESPONSE, SOCKET_RECV_SIZE,METHOD_RECV_SIZE,METHOD_STRINGS_SIZE,METHOD_URIHTTP_SIZE
@@ -86,10 +82,7 @@ cdef class RPCServer:
         self._socket = sock
         self._packer = msgpack.Packer(encoding=pack_encoding)
         self._unpacker = msgpack.Unpacker(encoding=unpack_encoding,use_list=False)
-        try:
-            self._send_lock = Semaphore()
-        except:
-            self._send_lock = None
+        self._send_lock = None
         self._run()
     def __del__(self):
         try:
