@@ -47,37 +47,7 @@ cdef tuple decode_urihttp(url):
     return result
 
 #####################################################
-cdef class RPCServer:
-    """RPC server.
-
-    This class is assumed to be used with gevent StreamServer.
-
-    :param socket: Socket object.
-    :param tuple address: Client address.
-    :param str pack_encoding: (optional) Character encoding used to pack data
-        using Messagepack.
-    :param str unpack_encoding: (optional) Character encoding used to unpack
-        data using Messagepack.
-
-    Usage:
-        >>> from gevent.server import StreamServer
-        >>> import mprpc
-        >>> 
-        >>> class SumServer(mprpc.RPCServer):
-        ...     def sum(self, x, y):
-        ...         return x + y
-        ... 
-        >>> 
-        >>> server = StreamServer(('127.0.0.1', 6000), SumServer)
-        >>> server.serve_forever()
-    """
-
-    cdef _socket
-    cdef _packer
-    cdef _unpacker
-    cdef _send_lock
-
-    #####################################################
+class RPCServer(object):
     def __init__(self, sock, address, pack_encoding='utf-8',unpack_encoding='utf-8'):
         self._socket = sock
         self._packer = msgpack.Packer(encoding=pack_encoding)
